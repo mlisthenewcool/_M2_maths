@@ -1,0 +1,270 @@
+\documentclass[a4paper,12pt,twosided]{article}
+\usepackage{latexsym,amsthm,amsfonts,amsgen,amssymb,amscd,amsmath}
+\usepackage[french]{babel}
+\usepackage{rotating}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+%\usepackage{fullpage}
+%\pagestyle{empty}
+\usepackage[standard-baselineskips]{cmbright}
+\usepackage{geometry} 
+\geometry{a4paper, textwidth=7.4in, textheight=10in,
+  marginparsep=9pt, marginparwidth=.6in,top=.8in}
+\setlength\parindent{.6cm}
+\setlength\itemsep{0in}
+\setlength\parsep{.2cm}
+\setlength\parskip{.2cm}
+% \usepackage[inline]{enumitem}
+\usepackage{enumerate}
+\usepackage{mathrsfs}
+\newcommand{\prob}{\mathbb P}
+\newcommand{\esp}{\mathbb E}
+\newcommand{\ee}{\mathrm e}
+\newcommand{\ep}{\varepsilon}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\ds}{\displaystyle}
+\renewcommand{\mathcal}{\mathscr}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\var}{\operatorname{Var}}
+\newcommand{\Loi}{\operatorname{Loi}}
+\newcommand{\loi}{\operatorname{Loi}}
+\newcommand{\st}{\,|\,}
+
+
+
+\newtheorem{theoreme}{Théorème}
+\theoremstyle{definition}
+\newtheorem{exercice}{Exercice}
+\newtheorem{probleme}{Problème}
+\usepackage{sectsty} 
+\usepackage{fancyhdr}
+
+\parindent 0pt
+\parskip 7pt
+
+
+\fancyhead{}
+\fancyhead[LO,RE]{Aix-Marseille Université}
+\fancyhead[RO,LE]{M2 -- Mathématiques pour l'IA} % clear all header fields
+\fancyfoot{} % clear all footer fields
+\fancyfoot[LO,RE]{Projet noté}
+\fancyfoot[RO,LE]{Compte-rendu à rendre}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\pagestyle{fancy}
+
+
+\begin{document}
+
+\pagestyle{fancy}
+% -----
+
+\begin{center}
+  {\Large\textbf{Projet noté} : évaluation du risque par une méthode de Monte Carlo\\
+    et tests par permutations}%\par
+\end{center}
+%\bigskip
+%-----
+\textbf{Une étoile $^\star$ marque les questions difficiles. Le compte-rendu est à rendre sur
+  Ametice.}
+
+
+L'objectif de ce TP est de regarder le test de comparaison de deux moyennes à partir de deux
+échantillons indépendants.
+Les données forment un vecteur $(x_1,\ldots, x_m, y_1,\ldots, y_n)$ de longueur $m+n$. Elles
+concernent l'effet d'un traitement médical sur $m+n$ patients. Les $m=13$ premiers patients ont reçu
+le médicament $A$, qui est le traitement de référence. Les $n=16$ autres patients ont reçu le
+médicament $B$, qui est le nouveau traitement. L'objectif de l'étude est de savoir si ce médicament
+$B$ est plus efficace que le traitement de référence.
+
+Les données sont~:\\
+$x_{1:m}^\text{obs} = (-3.06, -0.71, 11.99, 1.42, 1.84, 13.1, 4.19, -8.06, -3.96, -2.24, 9.61, 3.47, 3.77)$ et\\
+$y_{1:n}^\text{obs} = (12.57, 7.44, 2.97, 10.35, 10.24, 9.89, 9.07, 8.23, 4.42, 2.9, 2.44, 0.49, 3.51, -3.05, 18.25, 12.29)$.
+
+On modélise ces données $(x_1,\ldots, x_m, y_1,\ldots, y_n)$ par le vecteur de variables aléatoires
+$(X_1,\ldots, X_m, Y_1,\ldots, Y_n)$. On suppose que ces $m+n$ variables sont indépendantes, que les
+$X_i$ ont tous même loi, d'espérance $\mu_X$ et que les $Y_j$ ont tous même loi, d'espérance
+$\mu_X+\Delta$. On s'intéresse au test 
+\[
+  H_0~: \Delta \le 0 \quad \textit{vs} \quad H_1~: \Delta>0.
+\]
+
+
+\section*{Partie 1~: Test de Student sous hypothèse gaussienne}
+
+Dans cette partie, on suppose que
+\begin{align}
+  \label{eq:loi1}
+  \loi(X_1) = \ldots = \loi(X_m) &= \mathscr N\Big(\mu_X, \sigma^2\Big), \quad \text{et} \
+  \\
+  \label{eq:loi2}
+  \loi(Y_1) = \ldots = \loi(Y_n) &= \mathscr N\Big(\mu_X+\Delta, \sigma^2\Big).
+\end{align}
+Toutes les variables aléatoires du modèle suivent donc une loi gaussienne. En outre, on a supposé
+que $\var(X_1)=\cdots = \var(X_m)=\var(Y_1)=\cdots=\var(Y_n)$.
+
+On introduit
+\begin{equation}\label{eq:T}
+  T = \frac{\ds \bar Y - \bar X}{\ds \sqrt{S_p^2\left(\frac1m+\frac1n\right)}}
+\end{equation}
+où
+\[
+  \bar X = \frac1m\sum_{i=1}^m X_i, \quad \bar Y = \frac1n \sum_{j=1}^n Y_j,
+  \quad
+  S_X^2 = \frac1{m-1}\sum_{i=1}^m (X_i- \bar X)^2, \quad S_Y^2 = \frac1{n-1}\sum_{j=1}^n (Y_i- \bar Y)^2
+\]
+\[
+  \text{et} \quad S_p^2 = \frac{1}{m+n-2}\Big( (m-1)S_X^2 + (n-1)S_y^2 \Big).
+\]
+
+On admettra les résultats suivant~:
+\begin{itemize}
+\item $\bar X$ varie autour de $\mu_X$,
+\item $\bar Y$ varie autour de $\mu_Y$,
+\item $S_p^2$ varie autour de $\sigma^2$,
+\item et, sous l'hypothèse supplémentaire que (le vrai) $\Delta =0$, $T$ suit la loi de Student à
+  $m+n-2$ degrés de liberté. 
+\end{itemize}
+
+L'objectif est d'abord de suivre la section 3 du plan de cours sur les tests statistiques pour
+mettre en place le test de Student ici.
+
+\begin{enumerate}[\bf {1.}1.]
+\item Justifier du choix de $\Delta\le 0$ comme hypothèse nulle.
+\item Justifier du choix de la statistique de test $T$.
+\item Justifier que la zone de rejet soit de la forme $[c;+\infty[$, où $c$ est une constante à
+  déterminer.
+\item On note $\Phi_{m+n-2}$ la fonction de répartition de la loi de Student à $m+n-2$ degrés de
+  liberté. Montrer que, si l'on fixe la taille du test à $\alpha$, il faut choisir
+  $c=\Phi_{m+n-2}^{-1}(1-\alpha)$.
+\item Écrire une fonction (sans boucle \texttt{for} explicite), nommée \verb+calculeT+ qui calcule
+  la valeur observée de $T$, à partir de deux entrées~: le vecteur des $x_i$ et le vecteur des
+  $y_i$. Que vaut la valeur observée $t^\text{obs}$ ici~?
+\item En utilisant les fonctions de \verb+scipy.stats+, calculer $c$ dans notre cas si
+  $\alpha = 0.05$. Quelle décision prend le test de Student~?
+\item Montrer que la $p$-value est donnée ici par $p(X,Y) = 1 - \Phi_{m+n-2}(T)$. Quelle est la
+  valeur observée de la $p$-value~?
+\end{enumerate}
+
+\section*{Partie 2~: Étude de la puissance du test de Student}
+
+Dans cette partie, on conserve l'hypothèse de loi gaussienne des équations \eqref{eq:loi1} et
+\eqref{eq:loi2} et on note $\theta=(\mu_X, \Delta, \sigma^2)$.
+L'objectif est d'étudier la fonction puissance
+\[
+  \theta \mapsto \beta(\theta) = \prob_\theta\Big(T \ge \Phi_{m+n-2}^{-1}(1-\alpha)\Big).
+\]
+On s'intéresse aux valeurs de cette puissance lorsque
+\begin{equation}
+  \label{eq:intervalles}
+  \Delta \in [0; 15],\quad \text{et} \quad  \sigma^2\in [20;40].
+\end{equation}
+
+
+\begin{enumerate}[\bf {2.}1.]
+\item $^\star$ Montrer que la loi de $T$ ne dépend pas de $\mu_X$, mais uniquement de $\Delta$ et
+  $\sigma^2$. Dans toute la suite, on fixera $\mu_X = 0.92$ si on a besoin d'une valeur numérique.
+\item Écrire une fonction nommée \verb+simuleT+ qui prend en entrée les valeurs de $\Delta$ et
+  $\sigma^2$ et qui fait les choses suivantes~:
+  \begin{itemize}
+  \item elle simule un vecteur $(X_1,\ldots, X_m)$ et un vecteur $(Y_1,\ldots, Y_n)$, de longueurs
+    respectives $m=13$ et $n=17$~;
+  \item elle calcule et renvoie la valeur de $T$ de l'équation \eqref{eq:T}, en utilisant la fonction \verb+calculeT+.
+  \end{itemize}
+\item Écrire une fonction \verb+puissT+ qui prend en entrée les valeurs de $\Delta$, $\sigma^2$, $\alpha$ et
+  $N$ et qui fait les choses suivantes~:
+  \begin{itemize}
+  \item elle simule $N$ valeurs de $T$ indépendantes~;
+  \item elle calcule et renvoie le nombre de fois où $T\ge \Phi_{m+n-2}^{-1}(1-\alpha)$
+  \end{itemize}
+\item En utilisant cette fonction pour $\sigma^2=20$ et $N=10^3$, approcher les valeurs de
+  $\beta(\theta)$ pour les $16$ valeurs entières de $\Delta$ entre $0$ et $15$. Représenter
+  graphiquement ces approximations en fonction de $\Delta$.
+\item Même question pour $\sigma^2 = 30$.
+\item Même question pour $\sigma^2=40$.
+\item Que peut-on faire pour améliorer ces approximations~? Le faire, et constater le résultat.
+\end{enumerate}
+
+\section*{Partie 3 : calcul d'une $p$-value par une méthode de permutation Monte-Carlo}
+
+On suppose maintenant que 
+\begin{align}
+  \label{eq:loi3}
+  \loi(X_1) = \ldots = \loi(X_m) &\ \text{ de fonction de répartition }F(\cdot), \quad \text{et} \
+  \\
+  \label{eq:loi4}
+  \loi(Y_1) = \ldots = \loi(Y_n) &\ \text{ de fonction de répartition }F(\cdot-\Delta).
+\end{align}
+Désormais, le paramètre inconnu est $\theta = (\Delta, F)$.
+
+On note $(X_1^\ast,\ldots,X_m^\ast, Y_1^\ast, \ldots, Y_n^\ast)$ une permutation aléatoire du
+vecteur $(X_1,\ldots, X_m, Y_1,\ldots, Y_n)$. Autrement dit, $X_1^\ast$ est tiré uniformément au hasard par le
+vecteur $(X_1,\ldots, X_m, Y_1,\ldots, Y_n)$ de longueur $m+n$, puis $X_2^\ast$ est tiré
+uniformément au hasard parmi les $m+n-1$ coordonnées restantes de $(X_1,\ldots, X_m, Y_1,\ldots,
+Y_n)$,\ldots À la fin, $Y_n^\ast$ est la seule coordonnée de $(X_1,\ldots, X_m, Y_1,\ldots,
+Y_n)$ qui n'a pas encore été tirée.
+On pourra utiliser la fonction \verb+resample+ dans \verb+sklearn.utils+ pour faire cette
+permutation aléatoire.
+
+\begin{enumerate}[\bf {3.}1.]
+\item Écrire une fonction \verb+approxP+, qui prend en entrée le vecteur des données $(x_1,\ldots,
+  x_m, y_1, \ldots, y_n)$, $t^\text{obs}$ et $K$, et qui fait les
+  choses suivantes~:
+  \begin{itemize}
+  \item elle calcule $K$ valeurs de $T$ sur $K$ échantillons permutés $(X_1^\ast,\ldots,X_m^\ast,
+    Y_1^\ast, \ldots, Y_n^\ast)$ des données observées~;
+  \item elle compte, parmis ces $K$ valeurs de $T$, le nombre de fois où $T>t^\text{obs}$~;
+  \item elle renvoie la fréquence de $T>t^\text{obs}$ parmi ces $K$ simulations.
+  \end{itemize}
+\item $^\star$ En quelques lignes, expliquer pourquoi \verb+approxP+ permet d'approcher la $p$-value
+  du test.
+\item Rappeler comment on prend une décision en fonction de la valeur de la $p$-value et de la
+  taille $\alpha$ du test.
+\item Approcher la $p$-value du test sur les données qui nous intéresse par cette méthode avec
+  $K=10^4$. Quelle est la décision que l'on prend ici.
+\end{enumerate}
+
+\section*{Partie 4~: Étude la puissance du test mis en place dans la partie 3}
+
+L'objectif de cette partie est de comparer le test mis en place dans la partie 1, et celui mis en
+place dans la partie 3, lorsque les hypothèses de la partie 1 sont satisfaites, c'est-à-dire lorsque
+\eqref{eq:loi1} et \eqref{eq:loi2} sont satisfaites.
+Comme dans la partie 2, on s'intéresse à des valeurs de $\Delta$ et $\sigma^2$ qui vérifient
+\eqref{eq:intervalles} et pour $\mu_X=0.92$.
+On note $\theta\mapsto \beta_3(\theta)$ la fonction puissance du test de la partie 3.
+
+\begin{enumerate}[\bf {4.}1.]
+\item En s'inspirant de la partie 2, écrire une fonction \verb+puiss3+ qui prend en entrée les
+  valeurs de $\Delta$, $\sigma^2$, $\alpha$, $K$ et 
+  $N$ et qui fait les choses suivantes~:
+  \begin{itemize}
+  \item elle simule $N$ jeux de données suivant \eqref{eq:loi1} et \eqref{eq:loi2}~;
+  \item elle calcule, sur chacun de $N$ jeux de données, une approximation de la $p$-value à l'aide de
+    \verb+approxP+ avec $K$ permutations indépendantes~;
+  \item elle compte le nombre de fois où ces $N$ $p$-value sont inférieures à $\alpha$~;
+  \item elle renvoie la fréquence où $p<\alpha$ parmi ces $N$ valeurs de $p$.
+  \end{itemize}
+\item En utilisant cette fonction pour $\sigma^2=20$, $N=10^3$ et $K=400$, approcher les valeurs de
+  $\beta_3(\theta)$ pour les $16$ valeurs entières de $\Delta$ entre $0$ et $15$. Représenter
+  graphiquement ces approximations en fonction de $\Delta$, ainsi que $\beta(\theta)$ tel que
+  calculé dans la partie 2. On représentera les deux courbes dans deux couleurs différentes.
+\item Même question pour $\sigma^2 = 30$.
+\item Même question pour $\sigma^2=40$.
+\item Quel est le test le plus puissant sous l'hypothèse gaussienne~?
+\item Peut-on raisonnablement faire quelque chose ici pour améliorer l'approximation de $\beta_3(\theta)$~?
+\end{enumerate}
+
+
+\section*{Partie 5~: amélioration de l'approximation}
+
+L'objectif de cette partie est d'étudier l'article de Boos et Zhang (2000, \textit{Journal of the
+  American Statistical Association}). 
+
+\begin{enumerate}[\bf {5.}1.]
+\item Décrire en quelques lignes quel est l'objectif de l'article en question.
+\item Quelle est l'idée de l'algorithme~?
+\item $^\star$ Implémenter l'algorithme.
+\item $^\star$ L'utiliser et conclure. 
+\end{enumerate}
+
+\end{document}
